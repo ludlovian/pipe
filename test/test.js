@@ -52,11 +52,10 @@ test('get with wait', async t => {
   t.is(item, 'foo')
 
   let called = false
-  const p = pb.get({ wait: true })
-    .then(item => {
-      called = true
-      t.is(item, 'bar')
-    })
+  const p = pb.get({ wait: true }).then(item => {
+    called = true
+    t.is(item, 'bar')
+  })
 
   await delay(20)
   t.is(called, false)

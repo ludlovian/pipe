@@ -27,7 +27,7 @@ function postbox () {
     return item
   }
   function release () {
-    if (q.length && lock.locked) lock.release();
+    if (q.length && lock.locks > 0) lock.release();
   }
   async function * getAll () {
     while (true) {
