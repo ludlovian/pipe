@@ -94,14 +94,23 @@ test('postbox with width', async t => {
   pb.post('foo2')
   pb.post('foo3')
 
+  t.is(pb.size, 3)
+
   t.is(await pb.get({ wait: true }), 'foo1')
   t.is(await pb.get({ wait: true }), 'foo2')
+  t.is(pb.active, 2)
+  t.is(pb.size, 1)
+
   const p3 = pb.get()
   t.false(await isResolved(p3))
 
   pb.release()
   t.true(await isResolved(p3))
+  t.is(pb.active, 1)
+  t.is(pb.size, 0)
   t.is(await p3, 'foo3')
 
   pb.release()
+  t.is(pb.active, 0)
+  t.is(pb.size, 0)
 })

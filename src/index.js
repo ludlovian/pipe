@@ -43,6 +43,10 @@ export default class Postbox {
     return this._queue.length
   }
 
+  get active () {
+    return this._lock.locks
+  }
+
   get idle () {
     return this._busy.whenOff
   }
