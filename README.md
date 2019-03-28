@@ -10,10 +10,11 @@ A postbox is like a Python `queue` or a pipe. Items can be added and are process
 ### postbox
 ```
 import Postbox from 'postbox'
-const pb = new Postbox()
+const pb = new Postbox(width = 1)
 ```
 
-Creates an empty postbox.
+Creates an empty postbox. The `width` is the concurrency - how many readers can
+read at a time.
 
 ### post
 `pb.post(item)`

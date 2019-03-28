@@ -4,6 +4,11 @@ import test from 'ava'
 import Postbox from '../src'
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+const isResolved = (p, ms = 20) =>
+  new Promise(resolve => {
+    p.then(() => resolve(true))
+    setTimeout(() => resolve(false), ms)
+  })
 
 test('post and get', async t => {
   const pb = new Postbox()
@@ -65,5 +70,34 @@ test('get with wait', async t => {
   t.is(called, true)
 
   pb.release()
+  pb.release()
+})
+
+test('postbox with width', async t => {
+  const pb = new Postbox(2)
+  const p1 = pb.get()
+  const p2 = pb.get()
+
+  pb.post('foo')
+  t.true(await isResolved(p1))
+  t.false(await isResolved(p2))
+
+  pb.post('bar')
+  t.true(await isResolved(p2))
+  t.is(pb.size, 0)
+
+  pb.post('foo1')
+  pb.post('foo2')
+  pb.post('foo3')
+
+  t.is(await pb.get({ wait: true }), 'foo1')
+  t.is(await pb.get({ wait: true }), 'foo2')
+  const p3 = pb.get()
+  t.false(await isResolved(p3))
+
+  pb.release()
+  t.true(await isResolved(p3))
+  t.is(await p3, 'foo3')
+
   pb.release()
 })

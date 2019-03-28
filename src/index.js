@@ -1,27 +1,35 @@
 'use strict'
 
 import PLock from 'plock'
+import PSwitch from 'pswitch'
 
 export default class Postbox {
-  constructor () {
+  constructor (width = 1) {
     this._queue = []
-    this._lock = new PLock()
-    this._lock.lock()
+    this._lock = new PLock(width)
+    this._busy = new PSwitch(false)
   }
 
   post (item) {
-    if (this._queue.push(item) === 1) this._lock.release()
+    this._queue.push(item)
+    this._busy.set(true)
   }
 
   async get ({ wait = false } = {}) {
-    await this._lock.lock()
+    while (true) {
+      await this._busy.whenOn
+      await this._lock.lock()
+      if (this._queue.length) break
+      this._lock.release()
+    }
     const item = this._queue.shift()
-    if (this._queue.length && !wait) this._lock.release()
+    if (!this._queue.length) this._busy.set(false)
+    if (!wait) this._lock.release()
     return item
   }
 
   release () {
-    if (this._queue.length && this._lock.locks > 0) this._lock.release()
+    this._lock.release()
   }
 
   async * getAll () {

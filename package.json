@@ -24,7 +24,8 @@
     "standard": "^12.0.1"
   },
   "dependencies": {
-    "plock": "github:ludlovian/plock"
+    "plock": "github:ludlovian/plock",
+    "pswitch": "github:ludlovian/pswitch"
   },
   "ava": {
     "babel": false,
