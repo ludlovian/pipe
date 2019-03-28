@@ -14,9 +14,13 @@ test('post and get', async t => {
   const pb = new Postbox()
   pb.post('foo')
   t.is(pb.size, 1)
+  t.true(await isResolved(pb.busy))
+  t.false(await isResolved(pb.idle))
   const item = await pb.get()
   t.is(item, 'foo')
   t.is(pb.size, 0)
+  t.false(await isResolved(pb.busy))
+  t.true(await isResolved(pb.idle))
 })
 
 test('post multiple', async t => {

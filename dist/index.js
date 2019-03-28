@@ -39,6 +39,12 @@ class Postbox {
   get size () {
     return this._queue.length
   }
+  get idle () {
+    return this._busy.whenOff
+  }
+  get busy () {
+    return this._busy.whenOn
+  }
 }
 
 module.exports = Postbox;
