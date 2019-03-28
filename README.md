@@ -9,8 +9,8 @@ A postbox is like a Python `queue` or a pipe. Items can be added and are process
 
 ### postbox
 ```
-import postbox from 'postbox'
-const pb = postbox()
+import Postbox from 'postbox'
+const pb = new Postbox()
 ```
 
 Creates an empty postbox.

@@ -1,12 +1,12 @@
 'use strict'
 
 import test from 'ava'
-import postbox from '../src'
+import Postbox from '../src'
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 test('post and get', async t => {
-  const pb = postbox()
+  const pb = new Postbox()
   pb.post('foo')
   t.is(pb.size, 1)
   const item = await pb.get()
@@ -15,7 +15,7 @@ test('post and get', async t => {
 })
 
 test('post multiple', async t => {
-  const pb = postbox()
+  const pb = new Postbox()
   pb.post('foo')
   pb.post('bar')
 
@@ -28,7 +28,7 @@ test('post multiple', async t => {
 })
 
 test('getAll', async t => {
-  const pb = postbox()
+  const pb = new Postbox()
   pb.post('foo')
   pb.post('bar')
   pb.post('baz')
@@ -43,7 +43,7 @@ test('getAll', async t => {
 })
 
 test('get with wait', async t => {
-  const pb = postbox()
+  const pb = new Postbox()
   pb.post('foo')
   pb.post('bar')
 

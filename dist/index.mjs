@@ -1,36 +1,32 @@
-import plock from 'plock';
+import PLock from 'plock';
 
-function postbox () {
-  const q = [];
-  const lock = plock();
-  lock.lock();
-  return {
-    post,
-    get,
-    release,
-    getAll,
-    get size () {
-      return q.length
-    }
+class Postbox {
+  constructor () {
+    this._queue = [];
+    this._lock = new PLock();
+    this._lock.lock();
   }
-  function post (item) {
-    if (q.push(item) === 1) lock.release();
+  post (item) {
+    if (this._queue.push(item) === 1) this._lock.release();
   }
-  async function get ({ wait = false } = {}) {
-    await lock.lock();
-    const item = q.shift();
-    if (q.length && !wait) lock.release();
+  async get ({ wait = false } = {}) {
+    await this._lock.lock();
+    const item = this._queue.shift();
+    if (this._queue.length && !wait) this._lock.release();
     return item
   }
-  function release () {
-    if (q.length && lock.locks > 0) lock.release();
+  release () {
+    if (this._queue.length && this._lock.locks > 0) this._lock.release();
   }
-  async function * getAll () {
+  async * getAll () {
     while (true) {
-      const item = await get();
+      const item = await this.get();
       yield item;
     }
   }
+  get size () {
+    return this._queue.length
+  }
 }
 
-export default postbox;
+export default Postbox;
