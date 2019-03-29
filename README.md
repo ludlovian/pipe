@@ -39,5 +39,14 @@ Releases the postbox to process the next item, if `get` was called with `{ wait:
 
 Creates an async iterable for each item as it arrives
 
+### idle
+A promise that resolves when the queue is idle
+
+### busy
+A promise that resolves when the queue is busy
+
 ### size
 The current size of undelivered items in the postbox
+
+### active
+The number of locked items currently being processed.

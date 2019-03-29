@@ -19,12 +19,12 @@ class Postbox {
       this._lock.release();
     }
     const item = this._queue.shift();
-    if (!this._queue.length) this._busy.set(false);
-    if (!wait) this._lock.release();
+    if (!wait) this.release();
     return item
   }
   release () {
     this._lock.release();
+    if (this._queue.length === 0) this._busy.set(false);
   }
   async * getAll () {
     while (true) {
