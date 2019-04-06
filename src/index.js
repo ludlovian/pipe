@@ -6,12 +6,26 @@ import PSwitch from 'pswitch'
 export default class Postbox {
   constructor (width = 1) {
     this._queue = []
+    this._open = true
+    this._closeValue = undefined
     this._lock = new PLock(width)
     this._hasItems = new PSwitch(false)
   }
 
   post (item) {
+    if (!this.open) throw new Error('Postbox is closed')
     this._queue.push(item)
+    this._hasItems.set(true)
+  }
+
+  close (value) {
+    if (!this.open) return
+    this._closeValue = value
+    this._queue.splice(0)
+    this._open = false
+    // open all locks to release everything
+    while (this.active) this.release()
+    // claim we have something to release listeners in .get
     this._hasItems.set(true)
   }
 
@@ -25,7 +39,11 @@ export default class Postbox {
     // So we have to check for empty, and go around again if there is
     // nothing there.
     //
+    // We also have to check for closure, in which case we return the
+    // sentinel value given when closed
+    //
     while (true) {
+      if (!this.open) return this._closeValue
       await this._hasItems.whenOn
       await this._lock.lock()
       if (this._queue.length) break
@@ -45,10 +63,14 @@ export default class Postbox {
   }
 
   async * getAll () {
-    while (true) {
+    while (this.open) {
       const item = await this.get()
       yield item
     }
+  }
+
+  get open () {
+    return this._open
   }
 
   get size () {

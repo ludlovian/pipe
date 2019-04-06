@@ -36,19 +36,52 @@ test('post multiple', async t => {
   t.is(item, 'bar')
 })
 
+test('closing', async t => {
+  let pb = new Postbox()
+  let get1 = pb.get({ wait: true })
+  let get2 = pb.get()
+
+  pb.post('foo')
+  pb.post('bar')
+  t.true(pb.open)
+  t.is(await get1, 'foo')
+  t.false(await isResolved(get2))
+
+  pb.close('quux')
+  pb.close('foobar')
+
+  t.true(await isResolved(get2))
+  t.is(await get2, 'quux')
+
+  t.throws(() => pb.post('baz'))
+  t.false(pb.open)
+})
+
 test('getAll', async t => {
   const pb = new Postbox()
+  const res = []
+  let finished = false
+
+  // start consumer going
+  async function consume () {
+    for await (const item of pb.getAll()) {
+      res.push(item)
+    }
+    finished = true
+  }
+  const consumer = consume()
+
   pb.post('foo')
   pb.post('bar')
   pb.post('baz')
-  const res = []
 
-  for await (const item of pb.getAll()) {
-    res.push(item)
-    if (item === 'baz') break
-  }
+  // give it time to consume 'em all
+  await delay(50)
+  pb.close('quux')
+  await consumer
 
-  t.deepEqual(res, ['foo', 'bar', 'baz'])
+  t.true(finished)
+  t.deepEqual(res, ['foo', 'bar', 'baz', 'quux'])
 })
 
 test('get with wait', async t => {

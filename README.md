@@ -39,6 +39,12 @@ Releases the postbox to process the next item, if `get` was called with `{ wait:
 
 Creates an async iterable for each item as it arrives
 
+### close
+`pb.close(value)`
+
+Closes the postbox, and releases any waiting `get`s who receive the sentinel
+`value` supplied. This allows them to know the postbox is no longer in business
+
 ### idle
 A promise that resolves when the queue is idle
 
