@@ -37,9 +37,9 @@ test('post multiple', async t => {
 })
 
 test('closing', async t => {
-  let pb = new Postbox()
-  let get1 = pb.get({ wait: true })
-  let get2 = pb.get()
+  const pb = new Postbox()
+  const get1 = pb.get({ wait: true })
+  const get2 = pb.get()
 
   pb.post('foo')
   pb.post('bar')
@@ -89,8 +89,7 @@ test('get with wait', async t => {
   pb.post('foo')
   pb.post('bar')
 
-  let item
-  item = await pb.get({ wait: true })
+  const item = await pb.get({ wait: true })
   t.is(item, 'foo')
 
   let called = false

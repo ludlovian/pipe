@@ -29,7 +29,7 @@ class Postbox {
   async get ({ wait = false } = {}) {
     while (true) {
       if (!this.open) return this._closeValue
-      await this._hasItems.whenOn;
+      await this._hasItems.when(true);
       await this._lock.lock();
       if (this._queue.length) break
       this._lock.release();
@@ -58,10 +58,10 @@ class Postbox {
     return this._lock.locks
   }
   get idle () {
-    return this._hasItems.whenOff
+    return this._hasItems.when(false)
   }
   get busy () {
-    return this._hasItems.whenOn
+    return this._hasItems.when(true)
   }
 }
 
