@@ -1,0 +1,23 @@
+{
+  "name": "ppipe",
+  "version": "0.0.1",
+  "description": "Async pipe",
+  "main": "src/index.mjs",
+  "module": "src/index.mjs",
+  "type": "module",
+  "scripts": {
+    "clean": "rm -rf dist/ coverage/ node_modules/.cache/",
+    "format": "prettier-standard {src,test}/*.mjs",
+    "lint": "standard {src,test}/*.mjs|snazzy",
+    "test": "c8 uvu",
+    "coverage": "npm run test && c8 report --reporter=html && sirv coverage/ -p 8000 -H"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "uvu": "^0.5.1"
+  },
+  "dependencies": {
+    "pswitch": "github:ludlovian/pswitch"
+  }
+}
