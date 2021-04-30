@@ -41,4 +41,11 @@ test('push after close', async t => {
   assert.throws(() => pipe.push('bar'), /Pipe is closed/)
 })
 
+test('multiple close', async t => {
+  const pipe = new PPipe()
+  pipe.push('foo')
+  pipe.close()
+  assert.not.throws(() => pipe.close())
+})
+
 test.run()

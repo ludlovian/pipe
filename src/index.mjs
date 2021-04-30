@@ -4,27 +4,28 @@ const EOF = {}
 
 export default class PPipe {
   constructor () {
-    this._queue = []
-    this._open = true
-    this._hasItems = new PSwitch(false)
+    this.queue = []
+    this.open = true
+    this.empty = new PSwitch(true)
   }
 
   push (item) {
-    if (!this._open) throw new Error('Pipe is closed')
-    this._queue.push(item)
-    this._hasItems.set(true)
+    if (!this.open) throw new Error('Pipe is closed')
+    this.queue.push(item)
+    this.empty.set(false)
   }
 
   close () {
+    if (!this.open) return
     this.push(EOF)
-    this._open = false
+    this.open = false
   }
 
   async * read () {
     while (true) {
-      await this._hasItems.when(true)
-      const item = this._queue.shift()
-      this._hasItems.set(!!this._queue.length)
+      await this.empty.when(false)
+      const item = this.queue.shift()
+      this.empty.set(!this.queue.length)
       if (item === EOF) return
       yield item
     }
