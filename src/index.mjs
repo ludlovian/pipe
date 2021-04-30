@@ -1,5 +1,7 @@
 import PSwitch from 'pswitch'
 
+const EOF = {}
+
 export default class PPipe {
   constructor () {
     this._queue = []
@@ -14,15 +16,16 @@ export default class PPipe {
   }
 
   close () {
+    this.push(EOF)
     this._open = false
   }
 
   async * read () {
     while (true) {
-      if (!this._open) return
       await this._hasItems.when(true)
       const item = this._queue.shift()
       this._hasItems.set(!!this._queue.length)
+      if (item === EOF) return
       yield item
     }
   }
