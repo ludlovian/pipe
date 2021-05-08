@@ -1,14 +1,13 @@
 {
   "name": "pipe",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Async pipe",
   "main": "src/index.mjs",
   "module": "src/index.mjs",
   "type": "module",
   "exports": {
-      ".": "./src/index.mjs",
-      "./join": "./src/join.mjs",
-      "./join": "./src/tee.mjs"
+    ".": "./src/index.mjs",
+    "./join": "./src/tee.mjs"
   },
   "scripts": {
     "clean": "rm -rf coverage/ node_modules/.cache/",
