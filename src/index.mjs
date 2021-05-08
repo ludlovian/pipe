@@ -1,33 +1,38 @@
-import PSwitch from 'pswitch'
+import Lock from 'plock'
 
-const EOF = {}
+const EOD = {}
 
-export default class PPipe {
-  constructor () {
-    this.queue = []
-    this.open = true
-    this.empty = new PSwitch(true)
-  }
+export default function createPipe (size = Infinity) {
+  const queue = []
+  const queueGate = new Lock()
+  const dataGate = new Lock()
+  dataGate.lock()
 
-  push (item) {
-    if (!this.open) throw new Error('Pipe is closed')
-    this.queue.push(item)
-    this.empty.set(false)
-  }
+  const pipe = makePipe()
 
-  close () {
-    if (!this.open) return
-    this.push(EOF)
-    this.open = false
-  }
+  return Object.assign(pipe, { push, close })
 
-  async * read () {
+  async function * makePipe () {
     while (true) {
-      await this.empty.when(false)
-      const item = this.queue.shift()
-      this.empty.set(!this.queue.length)
-      if (item === EOF) return
+      await dataGate.lock()
+      const item = queue.shift()
+      if (item instanceof Error) throw item
+      if (item === EOD) return
+      if (queue.length < size) queueGate.unlock()
       yield item
+      if (queue.length) dataGate.unlock()
     }
+  }
+
+  async function push (item) {
+    await queueGate.lock()
+    queue.push(item)
+    if (queue.length < size) queueGate.unlock()
+    dataGate.unlock()
+  }
+
+  function close () {
+    pipe.push = () => Promise.reject(new Error('Pipe closed'))
+    return push(EOD)
   }
 }

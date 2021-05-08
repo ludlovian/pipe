@@ -15,9 +15,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "pixutil": "github:ludlovian/pixutil",
+    "promise-goodies": "github:ludlovian/promise-goodies",
     "uvu": "^0.5.1"
   },
   "dependencies": {
-    "pswitch": "github:ludlovian/pswitch"
+    "plock": "github:ludlovian/plock"
   }
 }
