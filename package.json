@@ -1,10 +1,14 @@
 {
-  "name": "ppipe",
+  "name": "pipe",
   "version": "1.1.0",
   "description": "Async pipe",
   "main": "src/index.mjs",
   "module": "src/index.mjs",
   "type": "module",
+  "exports": {
+      ".": "./src/index.mjs",
+      "./join": "./src/join.mjs"
+  },
   "scripts": {
     "clean": "rm -rf dist/ coverage/ node_modules/.cache/",
     "format": "prettier-standard {src,test}/*.mjs",
