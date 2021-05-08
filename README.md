@@ -47,3 +47,10 @@ produced the `value`.
 If any generator throws, then this will throw.
 
 When all the generators are ended, then this will end.
+
+## pipe/tee
+`const [pipeA, pipeB] = tee(source, n=2)`
+
+Tees an async generator stream into two new ones.
+
+Errors and endings are passed through.

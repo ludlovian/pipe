@@ -7,10 +7,11 @@
   "type": "module",
   "exports": {
       ".": "./src/index.mjs",
-      "./join": "./src/join.mjs"
+      "./join": "./src/join.mjs",
+      "./join": "./src/tee.mjs"
   },
   "scripts": {
-    "clean": "rm -rf dist/ coverage/ node_modules/.cache/",
+    "clean": "rm -rf coverage/ node_modules/.cache/",
     "format": "prettier-standard {src,test}/*.mjs",
     "lint": "standard {src,test}/*.mjs|snazzy",
     "test": "c8 uvu",
