@@ -13,6 +13,6 @@ async function feed (source, pipes) {
     }
     pipes.forEach(pipe => pipe.close())
   } catch (err) {
-    pipes.forEach(pipe => pipe.push(err))
+    pipes.forEach(pipe => pipe.throw(err))
   }
 }

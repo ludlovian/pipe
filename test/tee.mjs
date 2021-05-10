@@ -47,8 +47,8 @@ test('error', async () => {
   const [p2, p3] = tee(p1)
   const err = new Error('oops')
 
-  p1.push('foo')
-  p1.push(err)
+  await p1.push('foo')
+  await p1.throw(err)
 
   let count = 0
   try {

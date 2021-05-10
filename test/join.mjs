@@ -75,7 +75,7 @@ test('error', async () => {
   const r = joinPipes(pipe1, pipe2)
   const it = r[Symbol.asyncIterator]()
 
-  pipe2.push(err)
+  pipe2.throw(err)
   await it.next().then(assert.unreachable, error => {
     assert.is(error, err)
     assert.is(error.index, 1)

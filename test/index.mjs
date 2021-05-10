@@ -73,7 +73,7 @@ test('error', async () => {
   const pGet = it.next()
   assert.is.not(await pGet.isResolved())
 
-  pipe.push(err)
+  pipe.throw(err)
 
   await pGet.then(assert.unreachable, e => assert.is(e, err))
 })
@@ -85,6 +85,21 @@ test('push after close', async () => {
     .push('foo')
     .then(assert.unreachable)
     .catch(err => assert.is(err.message, 'Pipe closed'))
+})
+
+test('throw after close', async () => {
+  const err = new Error('oops')
+  const p = createPipe()
+  await p.close()
+  await p
+    .throw(err)
+    .then(assert.unreachable, e => assert.is(e.message, 'Pipe closed'))
+})
+
+test('close after close', async () => {
+  const p = createPipe()
+  await p.close()
+  await p.close().then(() => assert.ok(true), assert.unreachable)
 })
 
 test.run()
