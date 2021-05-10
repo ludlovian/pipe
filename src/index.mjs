@@ -1,7 +1,5 @@
 import Lock from 'plock'
 
-const EOD = {}
-
 export default function createPipe (size = Infinity) {
   const queue = []
   const queueGate = new Lock()
@@ -19,8 +17,8 @@ export default function createPipe (size = Infinity) {
       if (item instanceof Error) throw item
       if (item === EOD) return
       if (queue.length < size) queueGate.unlock()
-      yield item
       if (queue.length) dataGate.unlock()
+      yield item
     }
   }
 
