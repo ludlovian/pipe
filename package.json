@@ -5,10 +5,6 @@
   "main": "src/index.mjs",
   "module": "src/index.mjs",
   "type": "module",
-  "exports": {
-    ".": "./src/index.mjs",
-    "./join": "./src/tee.mjs"
-  },
   "scripts": {
     "clean": "rm -rf coverage/ node_modules/.cache/",
     "format": "prettier-standard {src,test}/*.mjs",
@@ -17,13 +13,13 @@
     "coverage": "npm run test && c8 report --reporter=html && sirv coverage/ -p 8000 -H"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Unlicense",
   "devDependencies": {
     "pixutil": "github:ludlovian/pixutil",
     "promise-goodies": "github:ludlovian/promise-goodies",
     "uvu": "^0.5.1"
   },
   "dependencies": {
-    "plock": "github:ludlovian/plock"
+    "syncevent": "github:ludlovian/syncevent"
   }
 }

@@ -1,56 +1,37 @@
-# pipe
-async pipe
+# Pipe
+Promise based simplex pipe
 
-## Purpose
+## Pipe
+`const [reader, writer] = new Pipe(size)`
 
-A pipe is an aynsc interable that you can push data into, and consume as
-a regular iterable.
+Creates a new pipe, and returns the two ends as `[reader, writer]`.
+The buffer size can be set, but defaults to 100 to stop runaway pipes eating memory.
 
-## pipe
-```
-import createPipe from 'pipe'
-const pipe = createPipe(maxsize))
-```
+## reader
 
-Creates a new pipe. The maximum size can be set (default: Infinity)
+The reader end is an async iterable which yields values.
 
-Reading is as per normal
-```
-for await (const item of pipe) {...}
-```
+## writer
 
-### #push
-`await pipe.push(item)`
+The writer end has the following attributes & methods
 
-Pushes an item into pipe. Will resolve once pushed, but could block if the
-maximum queue size has been reached
+### .write
+`await writer.write(value)`
 
-If you push an `Error` into it, then the iterable will throw it, and be
-rejected
+Writes a value into the pipe. May block if the buffer is full, so you should `await` it.
 
-### #close
-`pipe.close()`
+### .close
+`await writer.close()`
 
-Ends the iterable. Future pushes will reject.
+Puts an end-of-pipe marker into the pipe. When the reader gets this, it will finish iteration.
 
-## pipe/join
-```
-import joinPipes from 'pipe/join'
-const joined = joinPipes(pipe1, pipe2, ...)
-```
+### .throw
+`await writer.throw(error)`
 
-Joins existing async generators.
+Writes an error into the pipe. When the reader gets this, it will throw. This also closes the pipe.
 
-Yields a stream of `[index, value]` elements, where `index` shows which generator
-produced the `value`.
+### .closed
 
-If any generator throws, then this will throw.
+Signifies if the pipe is closed (i.e. either an error or end-of-pipe message has been written).
 
-When all the generators are ended, then this will end.
-
-## pipe/tee
-`const [pipeA, pipeB] = tee(source, n=2)`
-
-Tees an async generator stream into two new ones.
-
-Errors and endings are passed through.
+Any further attempt to write/throw will result in a `Pipe closed` error.
