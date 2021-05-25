@@ -1,59 +1,37 @@
-import SyncEvent from 'syncevent'
+export default function Pipe () {
+  let head = {}
+  let tail = head
 
-export default function Pipe (length = 100) {
-  const queue = []
-  const hasData = new SyncEvent()
-  const hasRoom = new SyncEvent()
-  hasRoom.set()
-
-  const reader = (async function * () {
-    while (true) {
-      await hasData.wait()
-      const { value, done, error } = queue.shift()
-      if (error) throw error
-      if (done) return
-      setEvents()
-      yield value
-    }
-  })()
-
+  const reader = {
+    next,
+    [Symbol.asyncIterator]: () => reader
+  }
   const writer = {
-    async write (value) {
-      if (writer.closed) throw new PipeClosed()
-      await _write({ value })
-    },
-
-    async throw (error) {
-      if (writer.closed) throw new PipeClosed()
-      writer.closed = true
-      await _write({ error })
-    },
-
-    async close () {
-      if (writer.closed) return
-      writer.closed = true
-      await _write({ done: true })
-    }
+    write: value => write({ value }),
+    close: _ => write({ done: true }),
+    throw: error => write({ error })
   }
-
-  async function _write (item) {
-    await hasRoom.wait()
-    queue.push(item)
-    setEvents()
-  }
-
-  function setEvents () {
-    if (queue.length && !hasData.isSet) hasData.set()
-    if (queue.length < length && !hasRoom.isSet) hasRoom.set()
-  }
-
   return [reader, writer]
-}
 
-class PipeClosed extends Error {
-  constructor () {
-    super('Pipe closed')
+  function write (item) {
+    if (tail.done) return undefined
+    if (item.done) item.next = Promise.resolve(item)
+    if (tail.resolve) tail.resolve(item)
+    else tail.next = Promise.resolve(item)
+    tail = item
+  }
+
+  async function next () {
+    if (!head.next) {
+      head.next = new Promise(resolve => (head.resolve = resolve))
+    }
+    head = await head.next
+    const { value, done, error } = head
+    if (error) {
+      tail = { done: true }
+      tail.next = head.next = Promise.resolve(tail)
+      throw error
+    }
+    return { value, done }
   }
 }
-
-Pipe.PipeClosed = PipeClosed

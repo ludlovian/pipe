@@ -18,8 +18,5 @@
     "pixutil": "github:ludlovian/pixutil",
     "promise-goodies": "github:ludlovian/promise-goodies",
     "uvu": "^0.5.1"
-  },
-  "dependencies": {
-    "syncevent": "github:ludlovian/syncevent"
   }
 }

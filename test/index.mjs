@@ -1,14 +1,12 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 
-import promiseGoodies from 'promise-goodies'
 import sleep from 'pixutil/sleep'
+import isResolved from 'pixutil/is-resolved'
 
 import Pipe from '../src/index.mjs'
 
-promiseGoodies()
-
-test('basic write & read', async t => {
+test('basic write then read', async t => {
   const [r, w] = new Pipe()
   await w.write('foo')
   await w.write('bar')
@@ -24,46 +22,28 @@ test('async write', async t => {
   const [r, w] = new Pipe()
   const written = (async () => {
     await sleep(100)
-    await w.write('foo')
+    w.write('foo')
     await sleep(100)
-    await w.write('bar')
+    w.write('bar')
   })()
 
   const it = r[Symbol.asyncIterator]()
   // first value
-  let { done, value } = await it.next()
-  assert.is(value, 'foo')
-  assert.not.ok(done)
+  let item = await it.next()
+  assert.is(item.value, 'foo')
+  assert.is(!!item.done, false)
   // second
-  ;({ done, value } = await it.next())
-  assert.is(value, 'bar')
-  assert.not.ok(done)
+  item = await it.next()
+  assert.is(item.value, 'bar')
+  assert.is(!!item.done, false)
   // done
   await written
-  await w.close()
-  ;({ done, value } = await it.next())
-  assert.ok(done)
-})
+  w.close()
+  item = await it.next()
+  assert.is(item.done, true)
 
-test('limited write', async () => {
-  const [r, w] = new Pipe(1)
-  const it = r[Symbol.asyncIterator]()
-
-  const pPut1 = w.write('foo')
-  assert.ok(await pPut1.isResolved(), 'write #1 resolves')
-
-  const pPut2 = w.write('bar')
-  assert.not.ok(await pPut2.isResolved(), 'write #2 is pending')
-
-  const { value: value1 } = await it.next()
-  assert.is(value1, 'foo', 'write #1 is read ok')
-  assert.ok(await pPut2.isResolved(50), 'write #2 resolves')
-
-  const { value: value2 } = await it.next()
-  assert.is(value2, 'bar')
-
-  const pGet3 = it.next()
-  assert.is.not(await pGet3.isResolved())
+  item = await it.next()
+  assert.is(item.done, true)
 })
 
 test('error', async () => {
@@ -73,39 +53,49 @@ test('error', async () => {
   const err = new Error('oops')
 
   const pGet = it.next()
-  assert.is.not(await pGet.isResolved())
+  assert.is(await isResolved(pGet), false)
 
-  await w.throw(err)
+  w.throw(err)
 
-  await pGet.then(assert.unreachable, e => assert.is(e, err))
+  await pGet.then(assert.unreachable).catch(e => assert.is(e, err))
+
+  const item = await it.next()
+  assert.is(item.done, true)
 })
 
 test('push after close', async () => {
-  const [, w] = new Pipe()
-  await w.close()
-  await w
-    .write('foo')
-    .then(assert.unreachable)
-    .catch(err => assert.instance(err, Pipe.PipeClosed))
+  const [r, w] = new Pipe()
+  const it = r[Symbol.asyncIterator]()
+  w.close()
+
+  let item = await it.next()
+  assert.is(item.done, true)
+
+  w.write('foo')
+
+  item = await it.next()
+  assert.is(item.done, true)
 })
 
 test('throw after close', async () => {
   const err = new Error('oops')
-  const [, w] = new Pipe()
-  await w.close()
-  await w
-    .throw(err)
-    .then(assert.unreachable)
-    .catch(err => assert.instance(err, Pipe.PipeClosed))
+  const [r, w] = new Pipe()
+  const it = r[Symbol.asyncIterator]()
+  w.close()
+
+  let item = await it.next()
+  assert.is(item.done, true)
+
+  w.throw(err)
+
+  item = await it.next()
+  assert.is(item.done, true)
 })
 
 test('close after close', async () => {
   const [, w] = new Pipe()
-  await w.close()
-  await w
-    .close()
-    .then(() => assert.ok(true))
-    .catch(assert.unreachable)
+  w.close()
+  assert.not.throws(() => w.close())
 })
 
 test.run()
