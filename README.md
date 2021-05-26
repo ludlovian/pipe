@@ -12,7 +12,7 @@ The reader end is an async iterable which yields values.
 
 ## writer
 
-The writer end has the following attributes & methods
+The writer end has the following methods
 
 ### .write
 `writer.write(value)`

@@ -1,35 +1,31 @@
-export default function Pipe () {
-  let head = {}
-  let tail = head
+import Chain from 'chain'
 
-  const reader = {
-    next,
-    [Symbol.asyncIterator]: () => reader
-  }
-  const writer = {
-    write: value => write({ value }),
-    close: _ => write({ done: true }),
-    throw: error => write({ error })
-  }
-  return [reader, writer]
+export default function Pipe () {
+  const chain = new Chain({
+    atEnd: () => new Promise(resolve => (chain.tail.resolve = resolve))
+  })
+  let curr = chain.tail
+  return [
+    { [Symbol.asyncIterator]: () => ({ next }) },
+    {
+      write: value => write({ value }),
+      close: _ => write({ done: true }),
+      throw: error => write({ error })
+    }
+  ]
 
   function write (item) {
-    if (tail.done) return undefined
-    if (item.done) item.next = Promise.resolve(item)
-    if (tail.resolve) tail.resolve(item)
-    else tail.next = Promise.resolve(item)
-    tail = item
+    const prev = chain.tail
+    if (prev.done) return
+    item = chain.add(item, item.done)
+    if (prev.resolve) prev.resolve(item)
   }
 
   async function next () {
-    if (!head.next) {
-      head.next = new Promise(resolve => (head.resolve = resolve))
-    }
-    head = await head.next
-    const { value, done, error } = head
+    const { value, done, error } = (curr = await curr.next())
     if (error) {
-      tail = { done: true }
-      tail.next = head.next = Promise.resolve(tail)
+      chain.add({ done: true }, true)
+      curr = chain.tail
       throw error
     }
     return { value, done }
