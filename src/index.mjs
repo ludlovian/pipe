@@ -24,8 +24,7 @@ export default function Pipe () {
   async function next () {
     const { value, done, error } = (curr = await curr.next())
     if (error) {
-      chain.add({ done: true }, true)
-      curr = chain.tail
+      curr = chain.add({ done: true }, true)
       throw error
     }
     return { value, done }
